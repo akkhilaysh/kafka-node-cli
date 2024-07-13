@@ -1,4 +1,9 @@
 const { kafka } =  require('./client')
+const readline = require('readline');
+
+const rl = readline.createInterface(
+    process.stdin, process.stdout
+);
 
 async function init() {
     const producer = kafka.producer();
@@ -7,18 +12,27 @@ async function init() {
     await producer.connect();
     console.log("Producer connected successfully")
 
-    console.log("Sending/posting message")
-    await producer.send({
-        topic: 'public.kuber.driver.tracker',
-        messages: [
-            {   partition: 0,
-                key: 'location', value: JSON.stringify({id: '49882', location: '41.40338, 2.17403', region: 'north'})}
-        ]
-    });
-    console.log("Message sent")
+    rl.setPrompt('> ')
+    rl.prompt();
 
-    await producer.disconnect();
-    console.log("Producer disconnected")
+    rl.on('line', async function(line) {
+        const [driverId, region] = line.split(' ')
+        const partition = region.toLowerCase() === 'north' ? 0 : 1;
+        const location = '41.40338, 2.17403'    // location hardcoded
+
+        console.log("Sending/posting message")
+        await producer.send({
+            topic: 'public.kuber.driver.tracker',
+            messages: [
+                {   partition: partition,
+                    key: 'location', value: JSON.stringify({id: driverId, location: location, region: region})}
+            ]
+        });  
+        console.log("Message sent")     
+    }).on('close', async() => {
+        await producer.disconnect();
+        console.log("Producer disconnected")
+    })
 }
 
 init();

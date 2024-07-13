@@ -10,7 +10,7 @@ async function init() {
     await admin.createTopics({
         topics: [{
             topic: "public.kuber.driver.tracker",
-        numPartitions: 2
+            numPartitions: 2
         }],
     });
     console.log("Topic created.")
