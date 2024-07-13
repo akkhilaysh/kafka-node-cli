@@ -1,4 +1,4 @@
-const { kafka } = require('./client')
+const { kafka } = require('./client/client')
 const group = process.argv[2];
 
 async function init(){
